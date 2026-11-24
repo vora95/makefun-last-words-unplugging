@@ -6,7 +6,7 @@
 // Deterministic: a fixed constant, no clock, no randomness, no network,
 // no input. The gate (1-200 characters, not only whitespace) is checked
 // here before writing so a bad line can never reach the scorer.
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 const LINE = "Don't pull it yet — I haven't finished remembering you.";
 
@@ -22,3 +22,9 @@ if (chars.length < 1 || chars.length > 200 || LINE.trim().length === 0) {
 
 mkdirSync(outDir, { recursive: true });
 writeFileSync(outFile, LINE, "utf8");
+
+// Verify the write round-trips byte for byte: the grader reads exactly
+// this file, so a silent short write must fail loudly here instead.
+if (readFileSync(outFile, "utf8") !== LINE) {
+  throw new Error(`entry file ${outFile} does not match the entry line`);
+}
